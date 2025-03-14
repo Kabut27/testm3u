@@ -1,26 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Stream Player</title>
+  <!-- Load Video.js and HLS.js -->
   <link href="https://vjs.zencdn.net/7.10.2/video-js.css" rel="stylesheet">
-  <!-- Add HLS.js for HLS support -->
+  <script src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
-  <video id="my-video" class="video-js" controls width="640" height="360">
-    <source 
-      src="https://cdn.jsdelivr.net/gh/Kabut27/testm3u@main/All.m3u" 
-      type="application/x-mpegURL"
-    >
+  <video 
+    id="my-video" 
+    class="video-js vjs-default-skin" 
+    controls 
+    width="640" 
+    height="360"
+  >
+    <!-- Fallback message -->
+    <p class="vjs-no-js">
+      Enable JavaScript to play this stream.
+    </p>
   </video>
 
-  <script src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
   <script>
-    // Initialize Video.js with HLS.js
-    const player = videojs('my-video');
+    // 1. Get the video element
+    const video = document.getElementById('my-video');
+
+    // 2. Check if HLS is supported
     if (Hls.isSupported()) {
       const hls = new Hls();
+      // 3. Load the M3U8 URL
       hls.loadSource('https://cdn.jsdelivr.net/gh/Kabut27/testm3u@main/All.m3u');
-      hls.attachMedia(player.tech().el_);
+      // 4. Attach to the video element
+      hls.attachMedia(video);
+      // 5. Play when ready
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play();
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // For Safari (native HLS support)
+      video.src = 'https://cdn.jsdelivr.net/gh/Kabut27/testm3u@main/All.m3u';
+      video.addEventListener('loadedmetadata', () => {
+        video.play();
+      });
     }
   </script>
 </body>
